@@ -106,7 +106,7 @@ The project demonstrates **OPTRAM** as an effective, non-invasive approach to ma
 ---
 ## 🏆 Author
 
-## Tejas Chavan  
+ Tejas Chavan  
 * GIS Expert at Government Of Maharashtra Revenue & Forest Department  
 * tejaskchavan22@gmail.com  
 * +91 7028338510  
