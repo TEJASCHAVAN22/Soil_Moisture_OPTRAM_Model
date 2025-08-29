@@ -104,3 +104,9 @@ A[🎯 Define Objective]
 The project demonstrates **OPTRAM** as an effective, non-invasive approach to map soil moisture using remote sensing indices. Outputs support **agriculture management, drought monitoring, and hydrological studies**.
 
 ---
+## 🏆 Author
+
+## Tejas Chavan  
+* GIS Expert at Government Of Maharashtra Revenue & Forest Department  
+* tejaskchavan22@gmail.com  
+* +91 7028338510  
