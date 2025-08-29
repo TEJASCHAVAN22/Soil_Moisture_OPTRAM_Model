@@ -1,0 +1,139 @@
+// ------------------ AOI ------------------
+var aoi = ee.FeatureCollection('projects/gee-trial2/assets/Shapfile/WMH_Distric');
+Map.centerObject(aoi, 7);
+Map.addLayer(aoi.style({color: 'blue', fillColor: '00000000'}), {}, 'AOI Boundary');
+
+// ------------------ Input Data ------------------
+var startDate = ee.Date.fromYMD(2019, 2, 1);
+var endDate   = ee.Date.fromYMD(2019, 3, 31);
+
+// Sentinel-2 collection (cloud < 10%)
+var S2 = ee.ImageCollection("COPERNICUS/S2")
+            .filterDate(startDate, endDate)
+            .filterBounds(aoi)
+            .filterMetadata('CLOUDY_PIXEL_PERCENTAGE', 'less_than', 10);
+
+var img = ee.Image(S2.median()).clip(aoi).divide(10000);
+
+// True color visualization
+Map.addLayer(img, {min:0, max:0.2, bands:["B4","B3","B2"]}, 'S2 True Color');
+
+// ------------------ NDVI & STR ------------------
+var SWIR = img.select('B12').rename('SWIR');
+
+var STR = SWIR.expression(
+  '((1 - SWIR) ** 2) / (2 * SWIR)', { 
+    'SWIR': SWIR
+}).rename('STR');
+
+var NDVI = img.normalizedDifference(['B8', 'B4']).rename('NDVI');
+
+Map.addLayer(NDVI, {min:0, max:0.8, palette:['red','yellow','green']}, 'NDVI');
+
+// ------------------ Function for Collection ------------------
+function collection_index(image) {
+  
+  // Function to extract NDVI min & max
+  function setNdviMinMax(img) {
+    var minMax = img.select('NDVI')
+                    .reduceRegion({
+                      reducer: ee.Reducer.minMax(),
+                      scale: 20,
+                      maxPixels: 1e13
+                    });
+    return img.set({
+      'NDVI_min': minMax.get('NDVI_min'),
+      'NDVI_max': minMax.get('NDVI_max')
+    });
+  }
+  
+  var ndvi_param  = image.normalizedDifference(['B8','B4']).rename('NDVI');
+  ndvi_param      = setNdviMinMax(ndvi_param);
+  
+  var SWIR_param  = image.select('B12').divide(10000).rename('SWIR');
+  
+  var STR_param   = SWIR_param.expression(
+    '((1 - SWIR) ** 2) / (2 * SWIR)', { 'SWIR': SWIR_param }
+  ).rename('STR');
+  
+  return ndvi_param.addBands(STR_param);
+}
+
+var coll = S2.map(collection_index);
+print('Processed Collection:', coll);
+
+// ------------------ OPTRAM Parameters ------------------
+
+// STR for full vegetation cover (NDVI ≥ 0.5)
+var STR_full_cover = coll.map(function(image) {
+  var full_cover = image.select('NDVI').gte(0.5);
+  return image.select('STR').updateMask(full_cover);
+});
+
+// STR for bare soil (NDVI 0–0.2)
+var STR_bare_soil = coll.map(function(image) {
+  var bare_soil = image.select('NDVI').gte(0).and(image.select('NDVI').lte(0.2));
+  return image.select('STR').updateMask(bare_soil);
+});
+
+// Extract OPTRAM parameters
+var vw_opt = ee.Number(
+  STR_full_cover.max().reduceRegion({
+    reducer: ee.Reducer.max(),
+    geometry: aoi,
+    scale: 20,
+    maxPixels: 1e9
+  }).values().get(0)
+);
+
+var vd_opt = ee.Number(
+  STR_full_cover.min().reduceRegion({
+    reducer: ee.Reducer.min(),
+    geometry: aoi,
+    scale: 20,
+    maxPixels: 1e9
+  }).values().get(0)
+);
+
+var iw_opt = ee.Number(
+  STR_bare_soil.max().reduceRegion({
+    reducer: ee.Reducer.max(),
+    geometry: aoi,
+    scale: 20,
+    maxPixels: 1e9
+  }).values().get(0)
+);
+
+var id_opt = ee.Number(
+  STR_bare_soil.min().reduceRegion({
+    reducer: ee.Reducer.min(),
+    geometry: aoi,
+    scale: 20,
+    maxPixels: 1e9
+  }).values().get(0)
+);
+
+print('vw_opt', vw_opt);
+print('vd_opt', vd_opt);
+print('iw_opt', iw_opt);
+print('id_opt', id_opt);
+
+var sd_opt = vd_opt.subtract(id_opt);
+var sw_opt = vw_opt.subtract(iw_opt);
+
+print('sd_opt', sd_opt);
+print('sw_opt', sw_opt);
+
+// ------------------ OPTRAM Calculation ------------------
+var OPTRAM = STR.expression(
+  '((id + (sd * NDVI) - STR) / ((id - iw) + ((sd - sw) * NDVI)) * 100)', {
+    'STR' : STR,
+    'NDVI': NDVI,
+    'id'  : id_opt,
+    'sd'  : sd_opt,
+    'iw'  : iw_opt,
+    'sw'  : sw_opt
+}).rename('OPTRAM');
+
+var OPTRAMParams = {min:0.1, max:0.2, palette:['red','orange','yellow','green','cyan','blue']};
+Map.addLayer(OPTRAM.clip(aoi), OPTRAMParams, 'OPTRAM Index');
