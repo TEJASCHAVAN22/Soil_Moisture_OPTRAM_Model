@@ -1,13 +1,12 @@
+# 🌾 Soil Moisture Estimation Using OPTRAM Model in Python
 
-🌾 Soil Moisture Estimation Using OPTRAM Model in Python
-
-** 📄 Overview
+## 📄 Overview
 
 This project implements the **OPTRAM (Optical Trapezoid Model)** for estimating soil moisture from satellite imagery. Using NDVI (vegetation index) and shortwave infrared-based soil reflectance, the model maps each pixel into a trapezoidal feature space. Upper and lower boundaries represent wet and dry soil conditions. The workflow covers data preprocessing, trapezoid construction, soil moisture calculation, visualization, and export for GIS analysis.
 
 ---
 
-** 📊 Project Specifications
+## 📊 Project Specifications
 
 | Attribute                | Details                                              |
 | ------------------------ | ---------------------------------------------------- |
@@ -23,7 +22,7 @@ This project implements the **OPTRAM (Optical Trapezoid Model)** for estimating 
 
 ---
 
-** ⚙️ Dependencies
+## ⚙️ Dependencies
 
 | Library        | Purpose                                      |
 | -------------- | -------------------------------------------- |
@@ -35,7 +34,7 @@ This project implements the **OPTRAM (Optical Trapezoid Model)** for estimating 
 
 ---
 
-** 🚀 Workflow
+## 🚀 Workflow
 
 ```text
 A[🎯 Define Objective] 
@@ -51,7 +50,7 @@ A[🎯 Define Objective]
 
 ---
 
-** 📌 Model / Algorithm Parameters
+## 📌 Model / Algorithm Parameters
 
 | Parameter                | Value             | Description                       |
 | ------------------------ | ----------------- | --------------------------------- |
@@ -61,7 +60,7 @@ A[🎯 Define Objective]
 
 ---
 
-** 📈 Evaluation Metrics
+## 📈 Evaluation Metrics
 
 | Metric   | Value Example | Description                             |
 | -------- | ------------- | --------------------------------------- |
@@ -71,7 +70,7 @@ A[🎯 Define Objective]
 
 ---
 
-** ⚡ Speed Profile (per tile/image)
+## ⚡ Speed Profile (per tile/image)
 
 | Stage         | Time (s) | Notes                      |
 | ------------- | -------- | -------------------------- |
@@ -82,7 +81,7 @@ A[🎯 Define Objective]
 
 ---
 
-** 🏆 Interpretation
+## 🏆 Interpretation
 
 * High correlation with ground truth (**R² = 0.78**) indicates reliable soil moisture estimation.
 * Trapezoid model efficiently differentiates wet vs dry soil across heterogeneous land covers.
@@ -90,7 +89,7 @@ A[🎯 Define Objective]
 
 ---
 
-** 📦 Final Outputs
+## 📦 Final Outputs
 
 | Output Type           | Format  | Description                        |
 | --------------------- | ------- | ---------------------------------- |
@@ -100,9 +99,8 @@ A[🎯 Define Objective]
 
 ---
 
-** 📌 Conclusion
+## 📌 Conclusion
 
 The project demonstrates **OPTRAM** as an effective, non-invasive approach to map soil moisture using remote sensing indices. Outputs support **agriculture management, drought monitoring, and hydrological studies**.
 
 ---
-
